@@ -1,4 +1,4 @@
-const web = "https://hexschoollivejs.herokuapp.com";
+const baseUrl = "https://hexschoollivejs.herokuapp.com";
 const api_path = "pandaa";
 const token = "0wqEojiDq0e1LPUqwrhkeg0wcX43";
 let productList = [];
@@ -6,23 +6,18 @@ const productWrap = document.querySelector('.productWrap');
 let cartList = [];
 const cartListWrap = document.querySelector('.js-cartList');
 const totalPrice = document.querySelector('.js-totalPrice');
-const productId = '';
-let cartId = '';
+let productId = '';
 
-function getProductId() {
-  const addCardBtns = document.querySelectorAll('#addCardBtn');
-  addCardBtns.forEach(function(item) {
-    item.addEventListener('click', function(e){
-      e.preventDefault();
-      productId = e.target.getAttribute("data-id");
-      addToCart();
-    })
-  })
+function init() {
+  getProductList();
+  getCartList();
 }
+
+init();
 
 // 取得產品清單
 function getProductList() {
-  axios.get(`${web}/api/livejs/v1/customer/${api_path}/products`)
+  axios.get(`${baseUrl}/api/livejs/v1/customer/${api_path}/products`)
     .then(function(res) {
       productList = res.data.products;
       console.log('產品清單',productList);
@@ -50,15 +45,15 @@ function productListRender() {
   productWrap.innerHTML = str;
 }
 
-// 購物車清單
+// 取得購物車清單
 function getCartList() {
-  axios.get(`${web}/api/livejs/v1/customer/${api_path}/carts`)
+  axios.get(`${baseUrl}/api/livejs/v1/customer/${api_path}/carts`)
   .then(function(res) {
     cartList = res.data.carts;
     console.log('購物車清單',cartList);
-    cartListRender();
     totalPrice.textContent = dollarSign(res.data.finalTotal);
-    delCartListData();
+    cartListRender();
+    deleteCartItem();
   })
   .catch(function() {
     console.log('讀取失敗，請稍後再試');
@@ -70,7 +65,7 @@ function cartListRender() {
   let str = '';
   cartList.forEach(function(item) {
     str += `
-    <tr class="js-cartListWrap">
+    <tr>
       <td>
         <div class="cardItem-title">
           <img src="${ item.product.images }" alt="" />
@@ -85,8 +80,19 @@ function cartListRender() {
       </td>
     </tr>`
   })
-  const insertAfter = (el, htmlString) => el.insertAdjacentHTML('afterend', htmlString);
-  insertAfter(cartListWrap, str); 
+  cartListWrap.innerHTML = str;
+
+}
+
+function getProductId() {
+  const addCardBtns = document.querySelectorAll('#addCardBtn');
+  addCardBtns.forEach(function(item) {
+    item.addEventListener('click', function(e){
+      e.preventDefault();
+      productId = e.target.getAttribute("data-id");
+      addToCart();
+    })
+  })
 }
 
 // 加入購物車
@@ -97,7 +103,7 @@ function addToCart() {
       "quantity": 1
     }
   };
-  axios.post(`${web}/api/livejs/v1/customer/${api_path}/carts`, cartData)
+  axios.post(`${baseUrl}/api/livejs/v1/customer/${api_path}/carts`, cartData)
     .then(function(res) {
       console.log(res,'加入購物車');
       getCartList();
@@ -105,17 +111,18 @@ function addToCart() {
 }
 
 // 刪除單筆購物車訂單
-function delCartListData() {
+function deleteCartItem() {
   const btnDelete = document.querySelectorAll('.js-btnDelete');
+  let cartId = '';
   btnDelete.forEach(function(item) {
     item.addEventListener('click', function(e){
       e.preventDefault();
       cartId = e.target.getAttribute("data-id");
-      console.log(cartId);
-      axios.delete( `${web}/api/livejs/v1/customer/{api_path}/carts/${cartId}`)
-      .then(function(res) {
-        console.log(res);
-      })
+      axios.delete( `${baseUrl}/api/livejs/v1/customer/${api_path}/carts/${cartId}`)
+        .then(function(res) {
+          console.log(res.data);
+          getCartList();
+        })
     })
   })
 }
@@ -124,6 +131,3 @@ function delCartListData() {
 function dollarSign(money) {
   return `NT$${ money }`
 }
-
-getProductList();
-getCartList();
