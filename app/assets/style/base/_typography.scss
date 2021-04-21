@@ -1,0 +1,20 @@
+$font-size-base: 1rem;
+
+@function toRem($unit) {
+  @return ($unit / $font-size-base) * 1rem;
+}
+
+$font-h3: toRem(32px);
+$font-h4: toRem(44px);
+
+html, body{
+  font-size: $font-size-base;
+  font-family: 'Noto Sans TC', sans-serif;
+  color: $gray-800;
+}
+
+.h3{
+  color: $white;
+  font-size: $font-h3;
+}
+
