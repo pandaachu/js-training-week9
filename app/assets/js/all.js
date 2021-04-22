@@ -6,7 +6,6 @@ let cartList = [];
 const productWrap = document.querySelector('.productWrap');
 const cartListWrap = document.querySelector('.js-cartList');
 const totalPrice = document.querySelector('.js-totalPrice');
-const productCategory = document.querySelector('.topBar-menu');
 const deleteAllCartItemBtn = document.querySelector('.discardAllBtn');
 const submitOrderBtn = document.querySelector('.orderInfo-btn');
 let productId = '';
@@ -17,13 +16,6 @@ function init() {
 }
 
 init();
-
-productCategory.addEventListener('change', function(e) {
-  e.preventDefault();
-  console.log('test');
-  let category = e.target.value;
-  console.log(category);
-})
 
 // 取得產品清單
 function getProductList() {
@@ -130,7 +122,6 @@ function deleteCartItem() {
       cartId = e.target.getAttribute("data-id");
       axios.delete( `${baseUrl}/api/livejs/v1/customer/${api_path}/carts/${cartId}`)
         .then(function(res) {
-          console.log(res.data);
           alert('刪除成功。');
           getCartList();
         })
