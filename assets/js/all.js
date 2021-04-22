@@ -1,11 +1,13 @@
 var baseUrl = "https://hexschoollivejs.herokuapp.com";
-var api_path = "pandaa";
-var token = "0wqEojiDq0e1LPUqwrhkeg0wcX43";
+var api_path = "pandaa"; // const token = "0wqEojiDq0e1LPUqwrhkeg0wcX43";
+
 var productList = [];
-var productWrap = document.querySelector('.productWrap');
 var cartList = [];
+var productWrap = document.querySelector('.productWrap');
 var cartListWrap = document.querySelector('.js-cartList');
 var totalPrice = document.querySelector('.js-totalPrice');
+var deleteAllCartItemBtn = document.querySelector('.discardAllBtn');
+var submitOrderBtn = document.querySelector('.orderInfo-btn');
 var productId = '';
 
 function init() {
@@ -89,11 +91,62 @@ function deleteCartItem() {
       e.preventDefault();
       cartId = e.target.getAttribute("data-id");
       axios["delete"]("".concat(baseUrl, "/api/livejs/v1/customer/").concat(api_path, "/carts/").concat(cartId)).then(function (res) {
-        console.log(res.data);
+        alert('刪除成功。');
         getCartList();
       });
     });
   });
+} // 刪除全部
+
+
+deleteAllCartItemBtn.addEventListener('click', function (e) {
+  e.preventDefault();
+  axios["delete"]("".concat(baseUrl, "/api/livejs/v1/customer/").concat(api_path, "/carts")).then(function (response) {
+    alert('刪除全部購物車成功。');
+    cartList = response.data.carts;
+    getCartList();
+  })["catch"](function (error) {
+    alert(error);
+  });
+});
+submitOrderBtn.addEventListener('click', function (e) {
+  e.preventDefault();
+  var name = document.querySelector('#customerName');
+  var tel = document.querySelector('#customerPhone');
+  var email = document.querySelector('#customerEmail');
+  var address = document.querySelector('#customerAddress');
+  var payment = document.querySelector('#tradeWay');
+
+  if (cartList.length == 0) {
+    alert('請選擇商品');
+    return;
+  }
+
+  axios.post("".concat(baseUrl, "/api/livejs/v1/customer/").concat(api_path, "/orders"), {
+    "data": {
+      "user": {
+        "name": name.value,
+        "tel": tel.value,
+        "email": email.value,
+        "address": address.value,
+        "payment": payment.value
+      }
+    }
+  }).then(function (response) {
+    alert("\u8A02\u55AE\u9001\u51FA\u6210\u529F\u3002");
+    getCartList();
+    clearFormData();
+  })["catch"](function (error) {
+    alert(error);
+  });
+});
+
+function clearFormData() {
+  name.value = '';
+  tel.value = '';
+  email.value = '';
+  address.value = '';
+  payment.value = "ATM";
 } // add dollar sign
 
 
