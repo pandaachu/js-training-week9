@@ -1,11 +1,14 @@
 const baseUrl = "https://hexschoollivejs.herokuapp.com";
 const api_path = "pandaa";
-const token = "0wqEojiDq0e1LPUqwrhkeg0wcX43";
+// const token = "0wqEojiDq0e1LPUqwrhkeg0wcX43";
 let productList = [];
-const productWrap = document.querySelector('.productWrap');
 let cartList = [];
+const productWrap = document.querySelector('.productWrap');
 const cartListWrap = document.querySelector('.js-cartList');
 const totalPrice = document.querySelector('.js-totalPrice');
+const productCategory = document.querySelector('.topBar-menu');
+const deleteAllCartItemBtn = document.querySelector('.discardAllBtn');
+const submitOrderBtn = document.querySelector('.orderInfo-btn');
 let productId = '';
 
 function init() {
@@ -14,6 +17,13 @@ function init() {
 }
 
 init();
+
+productCategory.addEventListener('change', function(e) {
+  e.preventDefault();
+  console.log('test');
+  let category = e.target.value;
+  console.log(category);
+})
 
 // 取得產品清單
 function getProductList() {
@@ -121,10 +131,69 @@ function deleteCartItem() {
       axios.delete( `${baseUrl}/api/livejs/v1/customer/${api_path}/carts/${cartId}`)
         .then(function(res) {
           console.log(res.data);
+          alert('刪除成功。');
           getCartList();
         })
     })
   })
+}
+
+// 刪除全部
+deleteAllCartItemBtn.addEventListener('click',function(e){
+  e.preventDefault();
+  axios.delete(`${baseUrl}/api/livejs/v1/customer/${api_path}/carts`)
+  .then(function (response) {
+    alert('刪除全部購物車成功。');
+    cartList = response.data.carts;
+    getCartList();
+  }).catch(function(error){
+    alert(error);
+  });
+})
+
+submitOrderBtn.addEventListener('click', function(e){
+  e.preventDefault();
+  const name = document.querySelector('#customerName');
+  const tel = document.querySelector('#customerPhone');
+  const email = document.querySelector('#customerEmail');
+  const address = document.querySelector('#customerAddress');
+  const payment = document.querySelector('#tradeWay');
+
+  if(cartList.length == 0)
+  {
+    alert('請選擇商品');
+    return;    
+  }
+  
+
+  axios.post(`${baseUrl}/api/livejs/v1/customer/${api_path}/orders`, 
+  {
+    "data": {
+      "user": {
+        "name": name.value,
+        "tel": tel.value,
+        "email": email.value,
+        "address": address.value,
+        "payment": payment.value
+      }
+    }
+  })
+  
+  .then(function (response) {
+    alert(`訂單送出成功。`);
+    getCartList();
+    clearFormData();
+  }).catch(function(error){
+    alert(error);
+  });
+})
+
+function clearFormData(){
+  name.value = '';
+  tel.value = '';
+  email.value = '';
+  address.value = '';
+  payment.value = "ATM";
 }
 
 // add dollar sign
